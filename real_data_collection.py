@@ -41,7 +41,7 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_trajs: int = 1
     """
     S, A, R, Snext, Term = [], [], [], [], []
     avg_cum_r = 0
-    for i in rich(range(nb_trajs)):
+    for i in rich.trange(nb_trajs):
         s, _ = env.reset()
         done = False
         cum_r = 0
