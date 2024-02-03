@@ -60,17 +60,18 @@ class TransitionTreeModel(TransitionModel):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
         )
-    
+
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
         self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
+
 
 class RewardTreeModel(RewardModel):
     def __init__(self, max_leaf_nodes: int = 1024):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
         )
-    
+
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
@@ -79,9 +80,10 @@ class RewardTreeModel(RewardModel):
 class DoneTreeModel(DoneModel):
     def __init__(self, max_leaf_nodes: int = 1024):
         super().__init__(
-            model=DecisionTreeClassifier, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+            model=DecisionTreeClassifier,
+            model_kwargs={"max_leaf_nodes": max_leaf_nodes},
         )
-    
+
     def fit(
         self,
         S: np.ndarray,
@@ -91,7 +93,7 @@ class DoneTreeModel(DoneModel):
         Term: np.ndarray,
     ):
         self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
-        
+
         Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
         Target_Transi = Term
         if self.rus and len(np.unique(Target_Transi)) > 1:
@@ -100,23 +102,38 @@ class DoneTreeModel(DoneModel):
             )
         self.model.fit(Train_Transi, Target_Transi)
 
+
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
+        self.has_been_fit = False
+
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.fit(np.concatenate((S, A), axis=1), Snext)
+        if self.has_been_fit:
+            self.model.partial_fit(np.concatenate((S, A), axis=1), Snext)
+        else:
+            self.model.fit(np.concatenate((S, A), axis=1), Snext)
+            self.has_been_fit = True
+
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
+        self.has_been_fit = False
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
+        if self.has_been_fit:
+            self.model.partial_fit(np.concatenate((S, A, Snext), axis=1), R)
+        else:
+            self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
+            self.has_been_fit = True
+
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
         super().__init__(model=MLPClassifier, model_kwargs={})
-    
+        self.has_been_fit = False
+
     def fit(
         self,
         S: np.ndarray,
@@ -131,4 +148,8 @@ class DoneMLPModel(DoneModel):
             Train_Transi, Target_Transi = self.rus.fit_resample(
                 Train_Transi, Target_Transi
             )
-        self.model.fit(Train_Transi, Target_Transi)
+        if self.has_been_fit:
+            self.model.partial_fit(Train_Transi, Target_Transi)
+        else:
+            self.model.fit(Train_Transi, Target_Transi)
+            self.has_been_fit = True

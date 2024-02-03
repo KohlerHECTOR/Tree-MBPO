@@ -62,13 +62,13 @@ class MBPOAgent:
             self.agent.learn(total_timesteps=100)
             self.add_new_real_data()
             print("Perf Real Env {}".format(self.evals[-1]))
-            self.times.append(time.time()-start)
-    
+            self.times.append(time.time() - start)
+
     def save(self, fname):
         os.makedirs(fname, exist_ok=True)
         np.savetxt(fname + "/times", self.times)
         np.savetxt(fname + "/evals", self.evals)
         self.agent.save(fname + "/policy")
-        dump(self.transi, fname + '/transi.joblib')
-        dump(self.reward, fname + '/reward.joblib') 
-        dump(self.done, fname + '/done.joblib') 
+        dump(self.transi, fname + "/transi.joblib")
+        dump(self.reward, fname + "/reward.joblib")
+        dump(self.done, fname + "/done.joblib")

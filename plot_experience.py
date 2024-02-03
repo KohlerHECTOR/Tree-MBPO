@@ -5,9 +5,8 @@ import sys
 args = sys.argv
 
 exp_name = args[1]
-evals = np.loadtxt(exp_name+"/evals")
-times = np.loadtxt(exp_name+"/times")
-
+evals = np.loadtxt(exp_name + "/evals")
+times = np.loadtxt(exp_name + "/times")
 
 
 plt.plot(np.arange(len(evals)), evals, label="Avg Cum Reward MBPO")
