@@ -62,7 +62,7 @@ class TransitionTreeModel(TransitionModel):
         )
     
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.max_leaf_nodes = self.model.max_leaf_nodes * 2
+        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
 
 class RewardTreeModel(RewardModel):
@@ -72,7 +72,7 @@ class RewardTreeModel(RewardModel):
         )
     
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.max_leaf_nodes = self.model.max_leaf_nodes * 2
+        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
 
 
@@ -90,7 +90,7 @@ class DoneTreeModel(DoneModel):
         Snext: np.ndarray,
         Term: np.ndarray,
     ):
-        self.model.max_leaf_nodes = self.model.max_leaf_nodes * 2
+        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         
         Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
         Target_Transi = Term
@@ -104,14 +104,14 @@ class TransitionMLPModel(TransitionModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.partial_fit(np.concatenate((S, A), axis=1), Snext)
+        self.model.fit(np.concatenate((S, A), axis=1), Snext)
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.partial_fit(np.concatenate((S, A, Snext), axis=1), R)
+        self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
@@ -131,4 +131,4 @@ class DoneMLPModel(DoneModel):
             Train_Transi, Target_Transi = self.rus.fit_resample(
                 Train_Transi, Target_Transi
             )
-        self.model.partial_fit(Train_Transi, Target_Transi)
+        self.model.fit(Train_Transi, Target_Transi)
