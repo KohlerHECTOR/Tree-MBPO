@@ -11,7 +11,7 @@ class TransitionTreeModel:
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
 
     def predict(self, s: np.ndarray, a: np.ndarray):
-        return self.model.predict(np.concatenate(s, a).reshape(-1, 1))[0]
+        return self.model.predict(np.concatenate(s, a).reshape(-1, 1))
 
 
 class RewardTreeModel:
@@ -41,7 +41,7 @@ class DoneTreeModel:
     ):
         Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
         Target_Transi = Term
-        if self.rus:
+        if self.rus and len(np.unique(Target_Transi)) > 1:
             Train_Transi, Target_Transi = self.rus.fit_resample(
                 Train_Transi, Target_Transi
             )

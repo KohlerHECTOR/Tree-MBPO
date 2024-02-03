@@ -18,8 +18,8 @@ def init_rng_data(
     for i in range(nb_data):
         S[i] = s
         A[i] = real_env.action_space.sample()
-        SN[i], R[i, :], Term[i, :], trunc, _ = real_env.step(A[i])
-        if Term[i]:
+        SN[i], R[i, 0], Term[i, 0], trunc, _ = real_env.step(A[i])
+        if Term[i, 0]:
             s, _ = real_env.reset()
         else:
             s = SN[i]

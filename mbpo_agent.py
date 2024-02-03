@@ -37,6 +37,7 @@ class MBPOAgent:
 
     def learn(self, iter: int = 10):
         self.evals = []
+        self.init_real_data()
         for i in range(iter):
             # Last arg is target
             self.transi.fit(self.S, self.A, self.Snext)
@@ -46,11 +47,11 @@ class MBPOAgent:
             self.model_env = self.make_env(
                 self.env, self.S, self.transi, self.reward, self.done
             )
-            if iter < 1:
+            if i < 1:
                 self.agent = self.agent(
                     "MlpPolicy", self.model_env, learning_starts=0, gradient_steps=30
                 )
             else:
                 self.agent.env = self.model_env
-            self.agent.learn(10_000)
+            self.agent.learn(total_timesteps=10_000)
             self.add_new_real_data()
