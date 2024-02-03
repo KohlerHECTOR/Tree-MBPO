@@ -23,3 +23,4 @@ Save Plots of results in 'MBPO-Tree-Model-Hopper/':
 
 MBPO: https://arxiv.org/abs/1906.08253
 
+![MBPO Schematic]([http://url/to/img.png](https://www.mathworks.com/help/reinforcement-learning/ug/mbpo-structure.png)https://www.mathworks.com/help/reinforcement-learning/ug/mbpo-structure.png)
