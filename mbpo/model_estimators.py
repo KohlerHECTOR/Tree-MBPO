@@ -77,11 +77,32 @@ class DoneTreeModel(DoneModel):
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
+    def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
+        self.model.partial_fit(np.concatenate((S, A), axis=1), Snext)
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
         super().__init__(model=MLPRegressor, model_kwargs={})
 
+    def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
+        self.model.partial_fit(np.concatenate((S, A, Snext), axis=1), R)
+
 class DoneMLPModel(DoneModel):
     def __init__(self):
         super().__init__(model=MLPClassifier, model_kwargs={})
+    
+    def fit(
+        self,
+        S: np.ndarray,
+        A: np.ndarray,
+        R: np.ndarray,
+        Snext: np.ndarray,
+        Term: np.ndarray,
+    ):
+        Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
+        Target_Transi = Term
+        if self.rus and len(np.unique(Target_Transi)) > 1:
+            Train_Transi, Target_Transi = self.rus.fit_resample(
+                Train_Transi, Target_Transi
+            )
+        self.model.partial_fit(Train_Transi, Target_Transi)
