@@ -67,7 +67,7 @@ class MBPOAgent:
         os.makedirs(fname, exist_ok=True)
         np.savetxt(fname + "/times", self.times)
         np.savetxt(fname + "/evals", self.evals)
-        self.agent.save(fname + "/")
+        self.agent.save(fname + "/policy")
         dump(self.transi, fname + '/transi.joblib')
         dump(self.reward, fname + '/reward.joblib') 
         dump(self.done, fname + '/done.joblib') 
