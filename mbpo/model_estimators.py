@@ -1,11 +1,13 @@
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 from imblearn.under_sampling import RandomUnderSampler
+from abc import ABC, abstractmethod
 
 
-class TransitionTreeModel:
-    def __init__(self, max_leaf_nodes: int = 256):
-        self.model = DecisionTreeRegressor(max_leaf_nodes=max_leaf_nodes)
+class TransitionModel:
+    def __init__(self, model, model_kwargs):
+        self.model = model(**model_kwargs)
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
@@ -14,9 +16,9 @@ class TransitionTreeModel:
         return self.model.predict(np.concatenate((s, a)).reshape(1, -1))[0]
 
 
-class RewardTreeModel:
-    def __init__(self, max_leaf_nodes: int = 256):
-        self.model = DecisionTreeRegressor(max_leaf_nodes=max_leaf_nodes)
+class RewardModel:
+    def __init__(self, model, model_kwargs):
+        self.model = model(**model_kwargs)
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
@@ -25,9 +27,9 @@ class RewardTreeModel:
         return self.model.predict(np.concatenate((s, a, snext)).reshape(1, -1))[0]
 
 
-class DoneTreeModel:
-    def __init__(self, max_leaf_nodes: int = 256, with_rus: bool = True):
-        self.model = DecisionTreeClassifier(max_leaf_nodes=max_leaf_nodes)
+class DoneModel:
+    def __init__(self, model, model_kwargs, with_rus: bool = True):
+        self.model = model(**model_kwargs)
         if with_rus:
             self.rus = RandomUnderSampler()
 
@@ -51,3 +53,35 @@ class DoneTreeModel:
         return self.model.predict(
             np.concatenate((s, a, np.array([r]), snext)).reshape(1, -1)
         )[0]
+
+
+class TransitionTreeModel(TransitionModel):
+    def __init__(self, max_leaf_nodes: int = 256):
+        super().__init__(
+            model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+        )
+
+class RewardTreeModel(RewardModel):
+    def __init__(self, max_leaf_nodes: int = 256):
+        super().__init__(
+            model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+        )
+
+
+class DoneTreeModel(DoneModel):
+    def __init__(self, max_leaf_nodes: int = 256):
+        super().__init__(
+            model=DecisionTreeClassifier, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+        )
+
+class TransitionMLPModel(TransitionModel):
+    def __init__(self):
+        super().__init__(self, model=MLPRegressor, model_kwargs={})
+
+class RewardMLPModel(RewardModel):
+    def __init__(self):
+        super().__init__(self, model=MLPRegressor, model_kwargs={})
+
+class DoneMLPModel(DoneModel):
+    def __init__(self):
+        super().__init__(self, model=MLPClassifier, model_kwargs={})

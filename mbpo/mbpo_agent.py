@@ -1,7 +1,10 @@
 from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
 import numpy as np
 import gymnasium as gym
-from real_data_collection import collect_real_data, init_rng_data
+from mbpo.real_data_collection import collect_real_data, init_rng_data
+import time
+import os
+from joblib import dump, load
 
 
 class MBPOAgent:
@@ -28,16 +31,18 @@ class MBPOAgent:
         new_S, new_A, new_R, new_Snext, new_Term, eval = collect_real_data(
             self.agent, self.env
         )
-        self.S = np.concatenate((self.S, new_S), axis=1)
-        self.A = np.concatenate((self.A, new_A), axis=1)
-        self.R = np.concatenate((self.R, new_R), axis=1)
-        self.Snext = np.concatenate((self.Snext, new_Snext), axis=1)
-        self.Term = np.concatenate((self.Term, new_Term), axis=1)
+        self.S = np.concatenate((self.S, new_S), axis=0)
+        self.A = np.concatenate((self.A, new_A), axis=0)
+        self.R = np.concatenate((self.R, new_R), axis=0)
+        self.Snext = np.concatenate((self.Snext, new_Snext), axis=0)
+        self.Term = np.concatenate((self.Term, new_Term), axis=0)
         self.evals.append(eval)
 
     def learn(self, iter: int = 10):
         self.evals = []
+        self.times = []
         self.init_real_data()
+        start = time.time()
         for i in range(iter):
             # Last arg is target
             self.transi.fit(self.S, self.A, self.Snext)
@@ -55,3 +60,14 @@ class MBPOAgent:
                 self.agent.env = self.model_env
             self.agent.learn(total_timesteps=1_000, progress_bar=True)
             self.add_new_real_data()
+            print("Perf Real Env {}".format(self.evals[-1]))
+            self.times.append(time.time()-start)
+    
+    def save(self, fname):
+        os.makedirs(fname, exist_ok=True)
+        np.savetxt(fname + "/times", self.times)
+        np.savetxt(fname + "/evals", self.evals)
+        self.agent.save(fname + "/")
+        dump(self.transi, fname + '/transi.joblib')
+        dump(self.reward, fname + '/reward.joblib') 
+        dump(self.done, fname + '/done.joblib') 

@@ -65,8 +65,8 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_trajs: int = 1
     return (
         np.array(S),
         np.array(A),
-        np.array(R),
+        np.array(R).reshape(-1,1),
         np.array(Snext),
-        np.array(Term, dtype=np.int8),
+        np.array(Term, dtype=np.int8).reshape(-1,1),
         avg_cum_r / nb_trajs,
     )
