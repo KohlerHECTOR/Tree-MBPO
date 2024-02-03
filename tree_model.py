@@ -11,7 +11,7 @@ class TransitionTreeModel:
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
 
     def predict(self, s: np.ndarray, a: np.ndarray):
-        return self.model.predict(np.concatenate(s, a).reshape(-1, 1))
+        return self.model.predict(np.concatenate((s, a)).reshape(1, -1))[0]
 
 
 class RewardTreeModel:
@@ -22,7 +22,7 @@ class RewardTreeModel:
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
 
     def predict(self, s: np.ndarray, a: np.ndarray, snext: np.ndarray):
-        return self.model.predict(np.concatenate(s, a, snext).reshape(-1, 1))
+        return self.model.predict(np.concatenate((s, a, snext)).reshape(1, -1))[0]
 
 
 class DoneTreeModel:
@@ -49,5 +49,5 @@ class DoneTreeModel:
 
     def predict(self, s: np.ndarray, a: np.ndarray, r: np.ndarray, snext: np.ndarray):
         return self.model.predict(
-            np.concatenate(s, a, r.reshape(-1, 1), snext).reshape(-1, 1)
-        )
+            np.concatenate((s, a, np.array([r]), snext)).reshape(1, -1)
+        )[0]

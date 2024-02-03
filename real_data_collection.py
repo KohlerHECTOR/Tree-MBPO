@@ -26,7 +26,7 @@ def init_rng_data(
     return S, A, R, SN, Term
 
 
-def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_trajs: int = 512):
+def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_trajs: int = 100):
     """collect real env transitions as seperate np arrays from the
     real model using policy trained on estimated model.
 
