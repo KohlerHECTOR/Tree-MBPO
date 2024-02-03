@@ -4,6 +4,7 @@ import gymnasium as gym
 from mbpo.real_data_collection import collect_real_data, init_rng_data
 import time
 import os
+from tqdm.rich import trange
 from joblib import dump, load
 
 
@@ -43,7 +44,7 @@ class MBPOAgent:
         self.times = []
         self.init_real_data()
         start = time.time()
-        for i in range(iter):
+        for i in trange(iter):
             # Last arg is target
             self.transi.fit(self.S, self.A, self.Snext)
             self.reward.fit(self.S, self.A, self.Snext, self.R)
@@ -58,7 +59,7 @@ class MBPOAgent:
                 )
             else:
                 self.agent.env = self.model_env
-            self.agent.learn(total_timesteps=1_000, progress_bar=True)
+            self.agent.learn(total_timesteps=100)
             self.add_new_real_data()
             print("Perf Real Env {}".format(self.evals[-1]))
             self.times.append(time.time()-start)
