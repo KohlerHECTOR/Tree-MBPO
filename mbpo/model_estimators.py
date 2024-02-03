@@ -76,12 +76,12 @@ class DoneTreeModel(DoneModel):
 
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
-        super().__init__(self, model=MLPRegressor, model_kwargs={})
+        super().__init__(model=MLPRegressor, model_kwargs={})
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
-        super().__init__(self, model=MLPRegressor, model_kwargs={})
+        super().__init__(model=MLPRegressor, model_kwargs={})
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
-        super().__init__(self, model=MLPClassifier, model_kwargs={})
+        super().__init__(model=MLPClassifier, model_kwargs={})
