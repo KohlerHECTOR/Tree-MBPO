@@ -5,7 +5,7 @@ Install scikit-learn and SB3
 
 ```pip3 install -r requirements.txt```
 
-### Available Models are Decision Tress and MLPs
+### Available Models are Decision Trees and MLPs
 
 Launch MBPO for 50 iterations on Hopper with Decision Trees as Model estimators.
 Results are saved in 'MBPO-Tree-Model-Hopper/':
