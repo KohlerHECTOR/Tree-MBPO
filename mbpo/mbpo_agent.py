@@ -31,6 +31,7 @@ class MBPOAgent:
         self.S, self.A, self.R, self.Snext, self.Term = init_rng_data(self.env)
 
     def add_new_transi(self, s: np.ndarray):
+        # no need for no_grad()
         action = self.agent.predict(th.FloatTensor(s.reshape(1, -1)), deterministic=False)[0][0]
         s_next, r, term, trunc, _ = self.env.step(action)
 
@@ -49,26 +50,25 @@ class MBPOAgent:
         for i in range(iter):
             self.transi.fit(self.S, self.A, self.R, self.Snext)
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
-            self.model_env = make_env(
-                self.env, self.S, self.transi, self.done, self.k
-            )
+            self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)   
+
             if i < 1:
                 ### Init agent for first time ####
                 agent_kwargs = dict(
                     policy="MlpPolicy",
                     env=self.model_env,
-                    train_freq=(400, "step"),
-                    gradient_steps=40,
+                    train_freq=(400, "step"), # 400
+                    gradient_steps=20, # 40
                     learning_starts=0,
-                    verbose=1
                 )
                 self.agent = self.agent(**agent_kwargs)
                 ### Init agent for first time ####
             else:
                 self.agent.env = self.model_env
-            s, _ = self.env.reset()
             cum_r = 0
-            for j in trange(1000): # Real env steps
+            # shoudl reset here
+            s, _ = self.env.reset()
+            for j in trange(1000): # Real env steps #1000
                 _, r, snext, term, trunc = self.add_new_transi(s)
                 cum_r += r
                 if term or trunc:
@@ -78,12 +78,15 @@ class MBPOAgent:
                     self.times.append(time.time() - start)
                     cum_r = 0
 
-                self.model_env = make_env(self.env, self.S, self.transi, self.done, self.k)   
+                self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)   
                 self.agent.env = self.model_env
-
-                self.agent.learn(total_timesteps=401)
-
+                self.agent.learn(total_timesteps=400) #400
+                # sanity check
+                # for param in self.agent.policy.actor.latent_pi.parameters():
+                #     continue
+                # print(param[0])
                 s = snext
+            self.times.append(time.time() - start)
                 
 
     def save(self, fname):

@@ -32,6 +32,6 @@ elif args[2] == "td3":
 else:
     AssertionError, "Only Pol Ooptim algos are SAC and TD3"
 
-mbpo = MBPOAgent(gym.wrappers.time_limit.TimeLimit(gym.make(env_name), 1000), transi, done, agent_cls)
+mbpo = MBPOAgent(gym.make(env_name, max_episode_steps=1000), transi, done, agent_cls)
 mbpo.learn(iters)
 mbpo.save(exp_name)

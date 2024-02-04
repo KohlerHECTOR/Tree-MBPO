@@ -40,7 +40,8 @@ class GymModel(gym.Env):
 
 
 def make_env(
-    real_env: gym.Env,
+    observation_space,
+    action_space, 
     real_states: np.ndarray,
     transi: FullTransitionModel,
     done: DoneModel,
@@ -49,9 +50,9 @@ def make_env(
     env_kwargs = dict(
         transi=transi,
         done=done,
-        obs_space=real_env.observation_space,
-        action_space=real_env.action_space,
+        obs_space=observation_space,
+        action_space=action_space,
         real_states_buffer=real_states,
         rollout_length=rollout_length,
     )
-    return make_vec_env(GymModel, env_kwargs=env_kwargs, n_envs=8)
+    return make_vec_env(GymModel, env_kwargs=env_kwargs, n_envs=1)
