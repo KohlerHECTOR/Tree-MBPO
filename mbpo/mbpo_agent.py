@@ -86,7 +86,6 @@ class MBPOAgent:
                 #     continue
                 # print(param[0])
                 s = snext
-            self.times.append(time.time() - start)
                 
 
     def save(self, fname):
