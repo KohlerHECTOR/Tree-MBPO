@@ -1,5 +1,5 @@
 from mbpo import *
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, TD3
 import gymnasium as gym
 import sys
 
@@ -21,6 +21,8 @@ elif args[1] == "mlp":
 
 else:
     AssertionError, "Only Model estimators are Decision Tree and MLP"
+
+
 
 mbpo = MBPOAgent(gym.make(env_name), transi, reward, done, SAC)
 mbpo.learn(iters)

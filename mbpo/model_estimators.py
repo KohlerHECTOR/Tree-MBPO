@@ -56,32 +56,30 @@ class DoneModel:
 
 
 class TransitionTreeModel(TransitionModel):
-    def __init__(self, max_leaf_nodes: int = 2048):
+    def __init__(self, max_depth: int = 10):
         super().__init__(
-            model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+            model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
         )
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
 
 
 class RewardTreeModel(RewardModel):
-    def __init__(self, max_leaf_nodes: int = 2048):
+    def __init__(self, max_depth: int = 2048):
         super().__init__(
-            model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
+            model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
         )
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
 
 
 class DoneTreeModel(DoneModel):
-    def __init__(self, max_leaf_nodes: int = 2048):
+    def __init__(self, max_depth: int = 2048):
         super().__init__(
             model=DecisionTreeClassifier,
-            model_kwargs={"max_leaf_nodes": max_leaf_nodes},
+            model_kwargs={"max_depth":max_depth},
         )
 
     def fit(
@@ -92,7 +90,6 @@ class DoneTreeModel(DoneModel):
         Snext: np.ndarray,
         Term: np.ndarray,
     ):
-        self.model.max_leaf_nodes = int(self.model.max_leaf_nodes * 1.2)
 
         Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
         Target_Transi = Term
