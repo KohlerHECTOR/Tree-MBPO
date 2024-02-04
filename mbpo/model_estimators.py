@@ -1,7 +1,9 @@
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.model_selection import GridSearchCV
 from imblearn.under_sampling import RandomUnderSampler
+from copy import deepcopy
 
 class TransitionModel:
     def __init__(self, model, model_kwargs):
@@ -77,6 +79,20 @@ class FullTransitionTreeModel(FullTransitionModel):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
         )
+
+class FullTransitionTreeCVModel(FullTransitionModel):
+    def __init__(self):
+        super().__init__(model=GridSearchCV, model_kwargs={"estimator":DecisionTreeRegressor(), "param_grid":{'max_depth':range(5,15)}, "n_jobs":4})
+        self.cv = deepcopy(self.model)
+
+    def fit(self, S: np.ndarray, A: np.ndarray, R: np.ndarray, Snext: np.ndarray):
+        self.cv.fit(np.concatenate((S, A), axis=1), np.concatenate((R, Snext), axis=1))
+        self.be = deepcopy(self.cv.best_estimator_)
+        self.cv = deepcopy(self.model)
+    
+    def predict(self, s: np.ndarray, a: np.ndarray):
+        rsnext = self.be.predict(np.concatenate((s, a)).reshape(1, -1))[0]
+        return rsnext[0], rsnext[1:]
 
 
 class RewardTreeModel(RewardModel):

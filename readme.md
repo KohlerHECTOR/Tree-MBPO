@@ -5,7 +5,7 @@ Install scikit-learn and SB3
 
 ```pip3 install -r requirements.txt```
 
-### Available Models are Decision Trees and MLPs
+### Available Models are Decision Trees, best CV Trees, and MLPs
 ### Available Policy Optim Algos are SAC and TD3
 
 Launch MBPO for 20 iterations on Hopper with Decision Trees as Model estimators and SAC as policy optim.

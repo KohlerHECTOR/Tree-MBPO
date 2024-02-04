@@ -19,8 +19,12 @@ elif args[1] == "mlp":
     transi = FullTransitionMLPModel()
     done = DoneMLPModel()
 
+elif args[1] == "cvtree":
+    transi = FullTransitionTreeCVModel()
+    done = DoneTreeModel()
+
 else:
-    AssertionError, "Only Model estimators are Decision Tree and MLP"
+    AssertionError, "Only Model estimators are Decision Tree, Best CV Tree, and MLP"
 
 
 if args[2] == "sac":
