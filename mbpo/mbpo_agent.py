@@ -59,6 +59,7 @@ class MBPOAgent:
                 self.env, self.S, self.transi, self.reward, self.done, self.k
             )
             if i < 1:
+                ### Init agent for first time ####
                 if self.no_params:
                     agent_kwargs = dict(
                         policy="MlpPolicy",
@@ -80,10 +81,14 @@ class MBPOAgent:
                         agent_kwargs.update(dict(target_update_frequency=256))
 
                 self.agent = self.agent(**agent_kwargs)
+                ### Init agent for first time ####
+
             else:
                 self.agent.env = self.model_env
+                
             self.agent.learn(total_timesteps=256)
             self.add_new_real_data()
+
             print("Perf Real Env {}".format(self.evals[-1]))
             self.times.append(time.time() - start)
 
