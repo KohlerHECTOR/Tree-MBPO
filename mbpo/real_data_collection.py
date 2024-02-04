@@ -50,11 +50,11 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 2
     cum_r = 0
     while stp < nb_steps:
         with th.no_grad():
-            mean_actions, _, _ = agent.policy.actor.get_action_dist_params(
-                th.FloatTensor(s.reshape(1, -1))
-            )
+            mean_actions = agent.predict(
+                th.FloatTensor(s.reshape(1, -1)), deterministic=False
+            )[0]
         S[stp] = s
-        action = mean_actions[0].numpy()
+        action = mean_actions[0]
         A[stp] = action
         s_next, r, term, trunc, infos = env.step(action)
         R[stp, 0] = r

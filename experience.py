@@ -5,6 +5,8 @@ import sys
 
 
 args = sys.argv[1:]
+
+assert len(args) == 4, "python3 experience.py env_name estimator_cls nb_iter exp_name"
 env_name = args[0]
 iters = int(args[2])
 exp_name = args[3]

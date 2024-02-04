@@ -73,6 +73,7 @@ class MBPOAgent:
             self.times.append(time.time() - start)
 
     def save(self, fname):
+        fname = "Experience_Results/" + fname
         os.makedirs(fname, exist_ok=True)
         np.savetxt(fname + "/times", self.times)
         np.savetxt(fname + "/evals", self.evals)
