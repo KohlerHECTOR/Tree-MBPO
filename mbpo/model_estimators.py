@@ -116,7 +116,7 @@ class RewardMLPModel(RewardModel):
         super().__init__(model=MLPRegressor, model_kwargs={"max_iter":32, "batch_size":32})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
+        self.model.fit(np.concatenate((S, A, Snext), axis=1), R.ravel())
 
 
 class DoneMLPModel(DoneModel):
@@ -137,4 +137,4 @@ class DoneMLPModel(DoneModel):
             Train_Transi, Target_Transi = self.rus.fit_resample(
                 Train_Transi, Target_Transi
             )
-        self.model.fit(Train_Transi, Target_Transi)
+        self.model.fit(Train_Transi, Target_Transi.ravel())

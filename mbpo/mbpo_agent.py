@@ -61,7 +61,7 @@ class MBPOAgent:
                     env=self.model_env,
                     learning_starts=256,
                     gradient_steps=32,
-                    train_freq=256,
+                    train_freq=128,
                     batch_size=16,
                     target_update_interval=256,
                 )
