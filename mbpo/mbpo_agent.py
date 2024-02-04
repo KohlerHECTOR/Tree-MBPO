@@ -71,19 +71,18 @@ class MBPOAgent:
                 if term or trunc:
                     s, _ = self.env.reset()
                     self.evals.append(cum_r)
+                    print("Perf Real Env {}".format(self.evals[-1]))
+                    self.times.append(time.time() - start)
                     cum_r = 0
                 
+
+                self.model_env = make_env(self.env, self.S, self.transi, self.done, self.k)   
+                self.agent.env = self.model_env
+
                 self.agent.learn(total_timesteps=400)
 
-                self.model_env = make_env(
-                self.env, self.S, self.transi, self.done, self.k
-            )   
-                self.agent.env = self.model_env
                 s = snext
                 
-
-            print("Perf Real Env {}".format(self.evals[-1]))
-            self.times.append(time.time() - start)
 
     def save(self, fname):
         fname = "Experience_Results/" + fname
