@@ -48,7 +48,7 @@ def make_env(
     transi: TransitionModel,
     reward: RewardModel,
     done: DoneModel,
-    rollout_length: int = 5,
+    rollout_length: int = 1,
 ):
     env_kwargs = dict(
         transi=transi,

@@ -19,7 +19,7 @@ class MBPOAgent:
         reward_mod: RewardModel,
         done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
-        length_model_rollouts: int = 5,
+        length_model_rollouts: int = 1,
         no_params: bool = True
     ):
         self.env = real_env
@@ -85,7 +85,7 @@ class MBPOAgent:
 
             else:
                 self.agent.env = self.model_env
-                
+
             self.agent.learn(total_timesteps=256)
             self.add_new_real_data()
 
