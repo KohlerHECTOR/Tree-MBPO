@@ -47,7 +47,7 @@ class MBPOAgent:
         self.times = []
         self.init_real_data()
         start = time.time()
-        for i in range(iter):
+        for i in trange(iter):
             self.transi.fit(self.S, self.A, self.R, self.Snext)
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
             self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)   
@@ -58,35 +58,35 @@ class MBPOAgent:
                     policy="MlpPolicy",
                     env=self.model_env,
                     train_freq=(400, "step"), # 400
-                    gradient_steps=20, # 40
+                    gradient_steps=64, # 40
                     learning_starts=0,
                 )
                 self.agent = self.agent(**agent_kwargs)
                 ### Init agent for first time ####
             else:
                 self.agent.env = self.model_env
+            # self.agent.gradient_steps += 1
+            self.agent.learn(total_timesteps=400) #400
+
+
             cum_r = 0
             # shoudl reset here
             s, _ = self.env.reset()
-            for j in trange(1000): # Real env steps #1000
+            for j in range(1000): # Real env steps #1000
                 _, r, snext, term, trunc = self.add_new_transi(s)
                 cum_r += r
                 if term or trunc:
                     s, _ = self.env.reset()
                     self.evals.append(cum_r)
-                    print("Perf Real Env {}".format(self.evals[-1]))
                     self.times.append(time.time() - start)
                     cum_r = 0
-
-                self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)   
-                self.agent.env = self.model_env
-                self.agent.learn(total_timesteps=400) #400
                 # sanity check
                 # for param in self.agent.policy.actor.latent_pi.parameters():
                 #     continue
                 # print(param[0])
                 s = snext
-                
+            print("Perf Real Env {}".format(self.evals[-1]))
+            
 
     def save(self, fname):
         fname = "Experience_Results/" + fname

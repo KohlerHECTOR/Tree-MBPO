@@ -75,18 +75,19 @@ class TransitionTreeModel(TransitionModel):
 
 
 class FullTransitionTreeModel(FullTransitionModel):
-    def __init__(self, max_depth: int = 10):
+    def __init__(self, max_leaf_nodes: int = 2**15):
         super().__init__(
-            model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
+            model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes":max_leaf_nodes, "criterion": "friedman_mse"}
         )
 
 class FullTransitionTreeCVModel(FullTransitionModel):
     def __init__(self):
-        super().__init__(model=GridSearchCV, model_kwargs={"estimator":DecisionTreeRegressor(), "param_grid":{'max_depth':range(5,15)}, "n_jobs":4})
+        super().__init__(model=GridSearchCV, model_kwargs={"estimator":DecisionTreeRegressor(), "param_grid":{'max_leaf_nodes':2**np.arange(11, 18),"criterion":["friedman_mse"]}, "n_jobs":6})
         self.cv = deepcopy(self.model)
 
     def fit(self, S: np.ndarray, A: np.ndarray, R: np.ndarray, Snext: np.ndarray):
         self.cv.fit(np.concatenate((S, A), axis=1), np.concatenate((R, Snext), axis=1))
+        print("Model score: {}, Tree leaves: {}".format(self.cv.best_score_, self.cv.best_params_))
         self.be = deepcopy(self.cv.best_estimator_)
         self.cv = deepcopy(self.model)
     
@@ -103,25 +104,52 @@ class RewardTreeModel(RewardModel):
 
 
 class DoneTreeModel(DoneModel):
-    def __init__(self, max_depth: int = 2048):
+    def __init__(self, max_leaf_nodes: int=2**15):
         super().__init__(
             model=DecisionTreeClassifier,
-            model_kwargs={"max_depth":max_depth},
+            model_kwargs={"max_leaf_nodes":max_leaf_nodes, "criterion": "entropy"},
         )
 
+class DoneTreeCVModel(DoneModel):
+    def __init__(self):
+        super().__init__(model=GridSearchCV, model_kwargs={"estimator":DecisionTreeClassifier(), "param_grid":{'max_leaf_nodes':2**np.arange(11, 18),"criterion":["entropy"]}, "n_jobs":6})
+        self.cv = deepcopy(self.model)
+    def fit(
+            self,
+            S: np.ndarray,
+            A: np.ndarray,
+            R: np.ndarray,
+            Snext: np.ndarray,
+            Term: np.ndarray,
+        ):
+        Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
+        Target_Transi = Term
+        if self.rus and len(np.unique(Target_Transi)) > 1:
+            Train_Transi, Target_Transi = self.rus.fit_resample(
+                Train_Transi, Target_Transi
+            )
+        self.cv.fit(Train_Transi, Target_Transi)
+        print("Done Model score: {}, Tree leaves: {}".format(self.cv.best_score_, self.cv.best_params_))
+        self.be = deepcopy(self.cv.best_estimator_)
+        self.cv = deepcopy(self.model)
+
+    def predict(self, s: np.ndarray, a: np.ndarray, r: np.ndarray, snext: np.ndarray):
+        return self.be.predict(
+            np.concatenate((s, a, np.array([r]), snext)).reshape(1, -1)
+        )[0]
 
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64,64], "max_iter":64})
 
 class FullTransitionMLPModel(FullTransitionModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64,64], "max_iter":64})
 
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64,64], "max_iter":64})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R.ravel())
@@ -129,7 +157,7 @@ class RewardMLPModel(RewardModel):
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
-        super().__init__(model=MLPClassifier, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
+        super().__init__(model=MLPClassifier, model_kwargs={"hidden_layer_sizes":[64,64], "max_iter":64})
 
     def fit(
         self,

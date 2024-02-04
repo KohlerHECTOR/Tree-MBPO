@@ -14,7 +14,7 @@ os.makedirs(compare_folder, exist_ok=True)
 ### Evals
 for exp_name in args:
     evals = np.loadtxt("Experience_Results/" + exp_name + "/evals")
-    plt.plot(np.arange(len(evals)), evals, label=exp_name)
+    plt.plot(np.arange(len(evals)), evals, label=exp_name, alpha=0.7)
 plt.ylabel("Avg Cumulative Reward on Real Env")
 plt.xlabel("Iter")
 plt.grid()
@@ -25,7 +25,7 @@ plt.clf()
 for exp_name in args:
     evals = np.loadtxt("Experience_Results/" + exp_name + "/evals")
     times = np.loadtxt("Experience_Results/" + exp_name + "/times")
-    plt.plot(times, evals, label=exp_name)
+    plt.plot(times, evals, label=exp_name, alpha=0.7)
 plt.ylabel("Avg Cumulative Reward on Real Env")
 plt.xlabel("Second")
 plt.grid()
