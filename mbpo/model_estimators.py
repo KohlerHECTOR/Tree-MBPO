@@ -105,12 +105,12 @@ class DoneTreeModel(DoneModel):
 
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={})
+        super().__init__(model=MLPRegressor, model_kwargs={"max_iter":32, "batch_size":32})
         self.has_been_fit = False
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
         if self.has_been_fit:
-            self.model.partial_fit(np.concatenate((S, A), axis=1), Snext)
+            self.model.fit(np.concatenate((S, A), axis=1), Snext)
         else:
             self.model.fit(np.concatenate((S, A), axis=1), Snext)
             self.has_been_fit = True
@@ -118,12 +118,12 @@ class TransitionMLPModel(TransitionModel):
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={})
+        super().__init__(model=MLPRegressor, model_kwargs={"max_iter":32, "batch_size":32})
         self.has_been_fit = False
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         if self.has_been_fit:
-            self.model.partial_fit(np.concatenate((S, A, Snext), axis=1), R)
+            self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
         else:
             self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
             self.has_been_fit = True
@@ -131,7 +131,7 @@ class RewardMLPModel(RewardModel):
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
-        super().__init__(model=MLPClassifier, model_kwargs={})
+        super().__init__(model=MLPClassifier, model_kwargs={"max_iter":32, "batch_size":32})
         self.has_been_fit = False
 
     def fit(
@@ -149,7 +149,7 @@ class DoneMLPModel(DoneModel):
                 Train_Transi, Target_Transi
             )
         if self.has_been_fit:
-            self.model.partial_fit(Train_Transi, Target_Transi)
+            self.model.fit(Train_Transi, Target_Transi)
         else:
             self.model.fit(Train_Transi, Target_Transi)
             self.has_been_fit = True
