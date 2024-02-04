@@ -5,7 +5,7 @@ Install scikit-learn and SB3
 
 ```pip3 install -r requirements.txt```
 
-![trees](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/evals.png?raw=true)
+![trees](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/evals-gsteps.png?raw=true)
 
 
 ### Available Models are Decision Trees, best CV Trees, and MLPs
