@@ -56,7 +56,7 @@ class DoneModel:
 
 
 class TransitionTreeModel(TransitionModel):
-    def __init__(self, max_leaf_nodes: int = 1024):
+    def __init__(self, max_leaf_nodes: int = 2048):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
         )
@@ -67,7 +67,7 @@ class TransitionTreeModel(TransitionModel):
 
 
 class RewardTreeModel(RewardModel):
-    def __init__(self, max_leaf_nodes: int = 1024):
+    def __init__(self, max_leaf_nodes: int = 2048):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_leaf_nodes": max_leaf_nodes}
         )
@@ -78,7 +78,7 @@ class RewardTreeModel(RewardModel):
 
 
 class DoneTreeModel(DoneModel):
-    def __init__(self, max_leaf_nodes: int = 1024):
+    def __init__(self, max_leaf_nodes: int = 2048):
         super().__init__(
             model=DecisionTreeClassifier,
             model_kwargs={"max_leaf_nodes": max_leaf_nodes},

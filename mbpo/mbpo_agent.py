@@ -55,11 +55,11 @@ class MBPOAgent:
             )
             if i < 1:
                 self.agent = self.agent(
-                    "MlpPolicy", self.model_env, learning_starts=0, gradient_steps=20
+                    "MlpPolicy", self.model_env, learning_starts=256, gradient_steps=32, train_freq=256, batch_size=16, target_update_interval=256
                 )
             else:
                 self.agent.env = self.model_env
-            self.agent.learn(total_timesteps=100)
+            self.agent.learn(total_timesteps=256)
             self.add_new_real_data()
             print("Perf Real Env {}".format(self.evals[-1]))
             self.times.append(time.time() - start)
