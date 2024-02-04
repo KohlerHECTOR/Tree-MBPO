@@ -7,7 +7,7 @@ from statistics import mean
 
 def init_rng_data(
     real_env: gym.Env,
-    nb_data: int = 2048,
+    nb_data: int = 1000,
 ):
     s, _ = real_env.reset()
     S = np.zeros((nb_data, real_env.observation_space.shape[0]))
@@ -26,7 +26,7 @@ def init_rng_data(
     return S, A, R, SN, Term
 
 
-def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 2048):
+def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 1000):
     """collect real env transitions as seperate np arrays from the
     real model using policy trained on estimated model.
 

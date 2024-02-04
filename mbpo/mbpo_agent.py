@@ -9,6 +9,7 @@ from tqdm.rich import trange
 from joblib import dump
 from mbpo.model_estimators import FullTransitionModel, DoneModel
 from mbpo.model_env import make_env
+import torch as th
 
 
 class MBPOAgent:
@@ -19,29 +20,21 @@ class MBPOAgent:
         done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
         length_model_rollouts: int = 1,
-        no_params: bool = True
     ):
         self.env = real_env
         self.transi = transi_mod
         self.done = done_mod
         self.agent = policy_optim
         self.k = length_model_rollouts
-        self.no_params = no_params
 
     def init_real_data(self):
         self.S, self.A, self.R, self.Snext, self.Term = init_rng_data(self.env)
 
-    def add_new_real_data(self):
-        new_S, new_A, new_R, new_Snext, new_Term, eval = collect_real_data(
-            self.agent, self.env
-        )
-        self.S = np.concatenate((self.S, new_S), axis=0)
-        self.A = np.concatenate((self.A, new_A), axis=0)
-        self.R = np.concatenate((self.R, new_R), axis=0)
-        self.Snext = np.concatenate((self.Snext, new_Snext), axis=0)
-        self.Term = np.concatenate((self.Term, new_Term), axis=0)
-        self.evals.append(eval)
-
+    def add_new_transi(self, s: np.ndarray):
+        action = self.agent.predict(th.FloatTensor(s.reshape(1, -1)), deterministic=False)[0][0]
+        s_next, r, term, trunc, _ = self.env.step(action)
+        return action, r, s_next, term, trunc
+        
     def learn(self, iter: int = 10):
         self.evals = []
         self.times = []
@@ -50,40 +43,44 @@ class MBPOAgent:
         for i in trange(iter):
             self.transi.fit(self.S, self.A, self.R, self.Snext)
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
-
             self.model_env = make_env(
                 self.env, self.S, self.transi, self.done, self.k
             )
             if i < 1:
                 ### Init agent for first time ####
-                if self.no_params:
-                    agent_kwargs = dict(
-                        policy="MlpPolicy",
-                        env=self.model_env,
-                        train_freq=(1, "step")
-                    )
-                
-                else:
-                    agent_kwargs = dict(
-                        policy="MlpPolicy",
-                        env=self.model_env,
-                        learning_starts=256,
-                        gradient_steps=32,
-                        train_freq=128,
-                        batch_size=16,
-                    )
-
-                    if self.agent == SAC:
-                        agent_kwargs.update(dict(target_update_frequency=256))
-
+                agent_kwargs = dict(
+                    policy="MlpPolicy",
+                    env=self.model_env,
+                    train_freq=(1, "step"),
+                    gradient_steps=40
+                )
                 self.agent = self.agent(**agent_kwargs)
                 ### Init agent for first time ####
-
             else:
                 self.agent.env = self.model_env
+            s, _ = self.env.reset()
+            cum_r = 0
+            for step in range(1000):
+                a, r, snext, term, trunc = self.add_new_transi(s)
+                cum_r += r
+                self.S = np.concatenate((self.S, s.reshape(1, -1)))
+                self.A = np.concatenate((self.A, a.reshape(1, -1)))
+                self.R = np.concatenate((self.R, np.array(r).reshape(-1, 1)))
+                self.Snext = np.concatenate((self.Snext, snext.reshape(1, -1)))
+                self.Term = np.concatenate((self.Term, np.array(term, dtype=np.int8).reshape(-1, 1)))
+                if term or trunc:
+                    s, _ = self.env.reset()
+                    self.evals.append(cum_r)
+                    cum_r = 0
+                
+                self.agent.learn(total_timesteps=400)
 
-            self.agent.learn(total_timesteps=256)
-            self.add_new_real_data()
+                self.model_env = make_env(
+                self.env, self.S, self.transi, self.done, self.k
+            )   
+                self.agent.env = self.model_env
+                s = snext
+                
 
             print("Perf Real Env {}".format(self.evals[-1]))
             self.times.append(time.time() - start)
@@ -95,5 +92,4 @@ class MBPOAgent:
         np.savetxt(fname + "/evals", self.evals)
         self.agent.save(fname + "/policy")
         dump(self.transi, fname + "/transi.joblib")
-        dump(self.reward, fname + "/reward.joblib")
         dump(self.done, fname + "/done.joblib")
