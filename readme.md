@@ -25,6 +25,7 @@ Save Plots of comparisons 'Experience_Results/Comparison-date-time/':
 ![MBPO-mlp](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/times-tree-mlp.png?raw=true)
 
 Save Plots of results in 'Experience_Results/hopper-tree-sac/':
+
 ```python3 plot_experience.py hopper-tree-sac```
 
 MBPO: https://arxiv.org/abs/1906.08253
