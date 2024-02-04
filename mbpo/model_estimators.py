@@ -12,6 +12,18 @@ class TransitionModel:
 
     def predict(self, s: np.ndarray, a: np.ndarray):
         return self.model.predict(np.concatenate((s, a)).reshape(1, -1))[0]
+    
+
+class FullTransitionModel:
+    def __init__(self, model, model_kwargs):
+        self.model = model(**model_kwargs)
+
+    def fit(self, S: np.ndarray, A: np.ndarray, R: np.ndarray, Snext: np.ndarray):
+        self.model.fit(np.concatenate((S, A), axis=1), np.concatenate((R, Snext), axis=1))
+
+    def predict(self, s: np.ndarray, a: np.ndarray):
+        rsnext = self.model.predict(np.concatenate((s, a)).reshape(1, -1))[0]
+        return rsnext[0], rsnext[1:]
 
 
 class RewardModel:
@@ -59,8 +71,12 @@ class TransitionTreeModel(TransitionModel):
             model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
         )
 
-    def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.fit(np.concatenate((S, A), axis=1), Snext)
+
+class FullTransitionTreeModel(FullTransitionModel):
+    def __init__(self, max_depth: int = 10):
+        super().__init__(
+            model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
+        )
 
 
 class RewardTreeModel(RewardModel):
@@ -68,9 +84,6 @@ class RewardTreeModel(RewardModel):
         super().__init__(
             model=DecisionTreeRegressor, model_kwargs={"max_depth":max_depth}
         )
-
-    def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
-        self.model.fit(np.concatenate((S, A, Snext), axis=1), R)
 
 
 class DoneTreeModel(DoneModel):
@@ -80,35 +93,19 @@ class DoneTreeModel(DoneModel):
             model_kwargs={"max_depth":max_depth},
         )
 
-    def fit(
-        self,
-        S: np.ndarray,
-        A: np.ndarray,
-        R: np.ndarray,
-        Snext: np.ndarray,
-        Term: np.ndarray,
-    ):
-
-        Train_Transi = np.concatenate((S, A, R.reshape(-1, 1), Snext), axis=1)
-        Target_Transi = Term
-        if self.rus and len(np.unique(Target_Transi)) > 1:
-            Train_Transi, Target_Transi = self.rus.fit_resample(
-                Train_Transi, Target_Transi
-            )
-        self.model.fit(Train_Transi, Target_Transi)
-
 
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64, 64]})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
 
-    def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
-        self.model.fit(np.concatenate((S, A), axis=1), Snext)
+class FullTransitionMLPModel(FullTransitionModel):
+    def __init__(self):
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
 
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64, 64]})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R.ravel())
@@ -116,7 +113,7 @@ class RewardMLPModel(RewardModel):
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
-        super().__init__(model=MLPClassifier, model_kwargs={"hidden_layer_sizes":[64, 64]})
+        super().__init__(model=MLPClassifier, model_kwargs={"hidden_layer_sizes":[200, 200, 200, 200]})
 
     def fit(
         self,

@@ -7,7 +7,7 @@ import time
 import os
 from tqdm.rich import trange
 from joblib import dump
-from mbpo.model_estimators import TransitionModel, RewardModel, DoneModel
+from mbpo.model_estimators import FullTransitionModel, DoneModel
 from mbpo.model_env import make_env
 
 
@@ -15,8 +15,7 @@ class MBPOAgent:
     def __init__(
         self,
         real_env: gym.Env,
-        transi_mod: TransitionModel,
-        reward_mod: RewardModel,
+        transi_mod: FullTransitionModel,
         done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
         length_model_rollouts: int = 1,
@@ -24,7 +23,6 @@ class MBPOAgent:
     ):
         self.env = real_env
         self.transi = transi_mod
-        self.reward = reward_mod
         self.done = done_mod
         self.agent = policy_optim
         self.k = length_model_rollouts
@@ -50,13 +48,11 @@ class MBPOAgent:
         self.init_real_data()
         start = time.time()
         for i in trange(iter):
-            # Last arg is target
-            self.transi.fit(self.S, self.A, self.Snext)
-            self.reward.fit(self.S, self.A, self.Snext, self.R)
+            self.transi.fit(self.S, self.A, self.R, self.Snext)
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
 
             self.model_env = make_env(
-                self.env, self.S, self.transi, self.reward, self.done, self.k
+                self.env, self.S, self.transi, self.done, self.k
             )
             if i < 1:
                 ### Init agent for first time ####

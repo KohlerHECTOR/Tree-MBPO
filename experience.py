@@ -12,13 +12,11 @@ iters = int(args[3])
 exp_name = args[4]
 
 if args[1] == "tree":
-    transi = TransitionTreeModel()
-    reward = RewardTreeModel()
+    transi = FullTransitionTreeModel()
     done = DoneTreeModel()
 
 elif args[1] == "mlp":
-    transi = TransitionMLPModel()
-    reward = RewardMLPModel()
+    transi = FullTransitionMLPModel()
     done = DoneMLPModel()
 
 else:
@@ -34,6 +32,6 @@ elif args[2] == "td3":
 else:
     AssertionError, "Only Pol Ooptim algos are SAC and TD3"
 
-mbpo = MBPOAgent(gym.wrappers.time_limit.TimeLimit(gym.make(env_name), 1000), transi, reward, done, agent_cls)
+mbpo = MBPOAgent(gym.wrappers.time_limit.TimeLimit(gym.make(env_name), 1000), transi, done, agent_cls)
 mbpo.learn(iters)
 mbpo.save(exp_name)

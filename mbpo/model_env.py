@@ -1,5 +1,5 @@
 import gymnasium as gym
-from mbpo.model_estimators import DoneModel, RewardModel, TransitionModel
+from mbpo.model_estimators import DoneModel, FullTransitionModel
 import numpy as np
 from stable_baselines3.common.env_util import make_vec_env
 
@@ -7,8 +7,7 @@ from stable_baselines3.common.env_util import make_vec_env
 class GymModel(gym.Env):
     def __init__(
         self,
-        transi: TransitionModel,
-        reward: RewardModel,
+        transi: FullTransitionModel,
         done: DoneModel,
         obs_space: gym.spaces.Space,
         action_space: gym.spaces.Space,
@@ -17,7 +16,6 @@ class GymModel(gym.Env):
     ):
         self.observation_space, self.action_space = obs_space, action_space
         self.transi = transi
-        self.reward = reward
         self.done = done
         self.real_states = real_states_buffer
         self.sstate = None
@@ -32,8 +30,7 @@ class GymModel(gym.Env):
 
     def step(self, action):
         term, trunc = False, False
-        snext = self.transi.predict(self.state, action)
-        r = self.reward.predict(self.state, action, snext)
+        r, snext = self.transi.predict(self.state, action)
         term = self.done.predict(self.state, action, r, snext)
         self.nb_steps += 1
         if self.nb_steps >= self.k:  # Is hyperparam
@@ -45,14 +42,12 @@ class GymModel(gym.Env):
 def make_env(
     real_env: gym.Env,
     real_states: np.ndarray,
-    transi: TransitionModel,
-    reward: RewardModel,
+    transi: FullTransitionModel,
     done: DoneModel,
     rollout_length: int = 1,
 ):
     env_kwargs = dict(
         transi=transi,
-        reward=reward,
         done=done,
         obs_space=real_env.observation_space,
         action_space=real_env.action_space,
