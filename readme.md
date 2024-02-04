@@ -23,7 +23,10 @@ Save Plots of comparisons 'Experience_Results/Comparison-date-time/':
 
 ```python3 compare_experiences.py hopper-tree-sac hopper-mlp-sac```
 
-![MBPO-mlp](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/times-tree-mlp.png?raw=true)
+
+![MBPO-sac](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/times-sac.png?raw=true)
+
+
 
 Save Plots of results in 'Experience_Results/hopper-tree-sac/':
 
@@ -33,3 +36,5 @@ MBPO: https://arxiv.org/abs/1906.08253
 
 ![MBPO-structure](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/mbpo-structure.png?raw=true)
 ![MBPO-rollout](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/mbpo-rollout.png?raw=true)
+
+![MBPO-td3](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/times-tree-mlp.png?raw=true)
