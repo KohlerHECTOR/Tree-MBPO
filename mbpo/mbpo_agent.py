@@ -1,4 +1,5 @@
 from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
+from stable_baselines3 import SAC, TD3
 import numpy as np
 import gymnasium as gym
 from mbpo.real_data_collection import collect_real_data, init_rng_data
@@ -19,6 +20,7 @@ class MBPOAgent:
         done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
         length_model_rollouts: int = 5,
+        no_params: bool = True
     ):
         self.env = real_env
         self.transi = transi_mod
@@ -26,6 +28,7 @@ class MBPOAgent:
         self.done = done_mod
         self.agent = policy_optim
         self.k = length_model_rollouts
+        self.no_params = no_params
 
     def init_real_data(self):
         self.S, self.A, self.R, self.Snext, self.Term = init_rng_data(self.env)
@@ -56,15 +59,26 @@ class MBPOAgent:
                 self.env, self.S, self.transi, self.reward, self.done, self.k
             )
             if i < 1:
-                self.agent = self.agent(
-                    "MlpPolicy",
-                    env=self.model_env,
-                    learning_starts=256,
-                    gradient_steps=32,
-                    train_freq=128,
-                    batch_size=16,
-                    target_update_interval=256,
-                )
+                if self.no_params:
+                    agent_kwargs = dict(
+                        policy="MlpPolicy",
+                        env=self.model_env
+                    )
+                
+                else:
+                    agent_kwargs = dict(
+                        policy="MlpPolicy",
+                        env=self.model_env,
+                        learning_starts=256,
+                        gradient_steps=32,
+                        train_freq=128,
+                        batch_size=16,
+                    )
+
+                    if self.agent == SAC:
+                        agent_kwargs.update(dict(target_update_frequency=256))
+
+                self.agent = self.agent(**agent_kwargs)
             else:
                 self.agent.env = self.model_env
             self.agent.learn(total_timesteps=256)
