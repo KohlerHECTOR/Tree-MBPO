@@ -102,7 +102,7 @@ class DoneTreeModel(DoneModel):
 
 class TransitionMLPModel(TransitionModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"max_iter":32, "batch_size":32})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64, 64]})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray):
         self.model.fit(np.concatenate((S, A), axis=1), Snext)
@@ -110,7 +110,7 @@ class TransitionMLPModel(TransitionModel):
 
 class RewardMLPModel(RewardModel):
     def __init__(self):
-        super().__init__(model=MLPRegressor, model_kwargs={"max_iter":32, "batch_size":32})
+        super().__init__(model=MLPRegressor, model_kwargs={"hidden_layer_sizes":[64, 64]})
 
     def fit(self, S: np.ndarray, A: np.ndarray, Snext: np.ndarray, R: np.ndarray):
         self.model.fit(np.concatenate((S, A, Snext), axis=1), R.ravel())
@@ -118,7 +118,7 @@ class RewardMLPModel(RewardModel):
 
 class DoneMLPModel(DoneModel):
     def __init__(self):
-        super().__init__(model=MLPClassifier, model_kwargs={"max_iter":32, "batch_size":32})
+        super().__init__(model=MLPClassifier, model_kwargs={"hidden_layer_sizes":[64, 64]})
 
     def fit(
         self,
