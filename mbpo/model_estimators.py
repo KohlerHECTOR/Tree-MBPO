@@ -2,8 +2,6 @@ import numpy as np
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier, MLPRegressor
 from imblearn.under_sampling import RandomUnderSampler
-from abc import ABC, abstractmethod
-
 
 class TransitionModel:
     def __init__(self, model, model_kwargs):
