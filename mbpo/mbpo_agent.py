@@ -5,25 +5,27 @@ from mbpo.real_data_collection import collect_real_data, init_rng_data
 import time
 import os
 from tqdm.rich import trange
-from joblib import dump, load
+from joblib import dump
+from mbpo.model_estimators import TransitionModel, RewardModel, DoneModel
+from mbpo.model_env import make_env
 
 
 class MBPOAgent:
     def __init__(
         self,
         real_env: gym.Env,
-        transi_mod,
-        reward_mod,
-        done_mod,
-        make_env_fn,
+        transi_mod: TransitionModel,
+        reward_mod: RewardModel,
+        done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
+        length_model_rollouts: int = 5,
     ):
         self.env = real_env
         self.transi = transi_mod
         self.reward = reward_mod
         self.done = done_mod
-        self.make_env = make_env_fn
         self.agent = policy_optim
+        self.k = length_model_rollouts
 
     def init_real_data(self):
         self.S, self.A, self.R, self.Snext, self.Term = init_rng_data(self.env)
@@ -50,12 +52,18 @@ class MBPOAgent:
             self.reward.fit(self.S, self.A, self.Snext, self.R)
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
 
-            self.model_env = self.make_env(
-                self.env, self.S, self.transi, self.reward, self.done
+            self.model_env = make_env(
+                self.env, self.S, self.transi, self.reward, self.done, self.k
             )
             if i < 1:
                 self.agent = self.agent(
-                    "MlpPolicy", self.model_env, learning_starts=256, gradient_steps=32, train_freq=256, batch_size=16, target_update_interval=256
+                    "MlpPolicy",
+                    env=self.model_env,
+                    learning_starts=256,
+                    gradient_steps=32,
+                    train_freq=256,
+                    batch_size=16,
+                    target_update_interval=256,
                 )
             else:
                 self.agent.env = self.model_env

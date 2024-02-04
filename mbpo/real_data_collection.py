@@ -33,13 +33,16 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 2
     Args:
         agent (OffPolicyAlgorithm): An SB3 off policy algorithm with actor
         env (gym.Env): Real environment model
-        nb_trajs (int, optional): Number of trajectories on real env by agent.
-        Defaults to 100.
+        nb_steps
 
     Returns:
         S, A, R, Snext, Term, evals: np arrays of transitions and mean cum reward of the agent.
     """
-    S, A, R, Snext, Term = [], [], [], [], []
+    S = np.zeros((nb_steps, env.observation_space.shape[0]))
+    A = np.zeros((nb_steps, env.action_space.shape[0]))
+    R = np.zeros((nb_steps, 1))
+    Snext = np.zeros((nb_steps, env.observation_space.shape[0]))
+    Term = np.zeros((nb_steps, 1), dtype=np.int8)
     avg_cum_r = []
     stp = 0
     s, _ = env.reset()
@@ -50,15 +53,15 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 2
             mean_actions, _, _ = agent.policy.actor.get_action_dist_params(
                 th.FloatTensor(s.reshape(1, -1))
             )
-        S.append(s)
+        S[stp] = s
         action = mean_actions[0].numpy()
-        A.append(action)
+        A[stp] = action
         s_next, r, term, trunc, infos = env.step(action)
-        stp += 1
-        R.append(r)
+        R[stp, 0] = r
+        Term[stp, 0] = term
+        Snext[stp] = s_next
         cum_r += r
-        Term.append(term)
-        Snext.append(s_next)
+        stp += 1
         s = s_next
         done = term or trunc
         if done:
@@ -66,11 +69,4 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 2
             cum_r = 0
             s, _ = env.reset()
 
-    return (
-        np.array(S),
-        np.array(A),
-        np.array(R).reshape(-1, 1),
-        np.array(Snext),
-        np.array(Term, dtype=np.int8).reshape(-1, 1),
-        mean(avg_cum_r),
-    )
+    return (S, A, R, Snext, Term, mean(avg_cum_r))

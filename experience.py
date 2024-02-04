@@ -22,6 +22,6 @@ elif args[1] == "mlp":
 else:
     AssertionError, "Only Model estimators are Decision Tree and MLP"
 
-mbpo = MBPOAgent(gym.make(env_name), transi, reward, done, make_env, SAC)
+mbpo = MBPOAgent(gym.make(env_name), transi, reward, done, SAC)
 mbpo.learn(iters)
 mbpo.save(exp_name)

@@ -48,6 +48,7 @@ def make_env(
     transi: TransitionModel,
     reward: RewardModel,
     done: DoneModel,
+    rollout_length: int = 5,
 ):
     env_kwargs = dict(
         transi=transi,
@@ -56,5 +57,6 @@ def make_env(
         obs_space=real_env.observation_space,
         action_space=real_env.action_space,
         real_states_buffer=real_states,
+        rollout_length=rollout_length,
     )
     return make_vec_env(GymModel, env_kwargs=env_kwargs, n_envs=8)
