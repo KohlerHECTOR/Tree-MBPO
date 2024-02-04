@@ -62,7 +62,8 @@ class MBPOAgent:
                 if self.no_params:
                     agent_kwargs = dict(
                         policy="MlpPolicy",
-                        env=self.model_env
+                        env=self.model_env,
+                        train_freq=(1, "step")
                     )
                 
                 else:

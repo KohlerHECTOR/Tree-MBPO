@@ -5,7 +5,7 @@ import sys
 args = sys.argv
 
 exp_name = args[1]
-exp_name = "Experience_Results/exp_name"
+exp_name = "Experience_Results/" + exp_name
 evals = np.loadtxt(exp_name + "/evals")
 times = np.loadtxt(exp_name + "/times")
 
