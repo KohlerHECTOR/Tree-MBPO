@@ -58,7 +58,7 @@ class MBPOAgent:
                     policy="MlpPolicy",
                     env=self.model_env,
                     train_freq=(400, "step"), # 400
-                    gradient_steps=64, # 40
+                    gradient_steps=40, # 40,
                     learning_starts=0,
                 )
                 self.agent = self.agent(**agent_kwargs)
