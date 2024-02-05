@@ -20,12 +20,23 @@ class MBPOAgent:
         done_mod: DoneModel,
         policy_optim: OffPolicyAlgorithm,
         length_model_rollouts: int = 1,
+        gsteps: int = 40,
+        nb_pol_optim_per_learned_model: int = 1,
+        nb_model_rollout_per_optim: int = 400,
+        nb_pol_update_per_optim: int = 1
     ):
         self.env = real_env
         self.transi = transi_mod
         self.done = done_mod
         self.agent = policy_optim
         self.k = length_model_rollouts
+        self.gsteps = gsteps
+        self.nb_optims = nb_pol_optim_per_learned_model
+        assert self.nb_optims <= 1000, "max optim per model is 1000"
+        self.optim_freq = 1000 // self.nb_optims
+        self.nb_rollouts = nb_model_rollout_per_optim
+        assert nb_pol_update_per_optim <= self.nb_rollouts, "nb pol update?optim sould be <= nb model rollout"
+        self.update_freq = self.nb_rollouts // nb_pol_update_per_optim
 
     def init_real_data(self):
         self.S, self.A, self.R, self.Snext, self.Term = init_rng_data(self.env)
@@ -47,45 +58,43 @@ class MBPOAgent:
         self.times = []
         self.init_real_data()
         start = time.time()
+
+        # Init Models #
+        # if not self.separate_transi_r:
+        self.transi.fit(self.S, self.A, self.R, self.Snext) # Separate ?
+        self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
+        self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)
+
+        # Init agent for first time #
+        agent_kwargs = dict(
+            policy="MlpPolicy",
+            env=self.model_env,
+            train_freq=(self.update_freq, "step"),
+            gradient_steps=self.gsteps,
+            learning_starts=0,
+        )
+        self.agent = self.agent(**agent_kwargs)
+
         for i in trange(iter):
-            self.transi.fit(self.S, self.A, self.R, self.Snext)
-            self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
-            self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)   
-
-            if i < 1:
-                ### Init agent for first time ####
-                agent_kwargs = dict(
-                    policy="MlpPolicy",
-                    env=self.model_env,
-                    train_freq=(400, "step"), # 400
-                    gradient_steps=40, # 40,
-                    learning_starts=0,
-                )
-                self.agent = self.agent(**agent_kwargs)
-                ### Init agent for first time ####
-            else:
-                self.agent.env = self.model_env
-            # self.agent.gradient_steps += 1
-            self.agent.learn(total_timesteps=400) #400
-
-
             cum_r = 0
             # shoudl reset here
             s, _ = self.env.reset()
             for j in range(1000): # Real env steps #1000
                 _, r, snext, term, trunc = self.add_new_transi(s)
+                if ((j+1) % self.optim_freq) == 0:
+                    self.model_env = make_env(self.env.observation_space, self.env.action_space, self.S, self.transi, self.done, self.k)
+                    self.agent.learn(total_timesteps=self.nb_rollouts)
                 cum_r += r
                 if term or trunc:
                     s, _ = self.env.reset()
                     self.evals.append(cum_r)
                     self.times.append(time.time() - start)
                     cum_r = 0
-                # sanity check
-                # for param in self.agent.policy.actor.latent_pi.parameters():
-                #     continue
-                # print(param[0])
                 s = snext
             print("Perf Real Env {}".format(self.evals[-1]))
+
+            self.transi.fit(self.S, self.A, self.R, self.Snext) # Separate ?
+            self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)
             
 
     def save(self, fname):
