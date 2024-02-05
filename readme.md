@@ -5,6 +5,10 @@ Install scikit-learn and SB3
 
 ```pip3 install -r requirements.txt```
 
+![trees-mlp](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/evals.png?raw=true)
+
+![trees-mlp-times](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/times.png?raw=true)
+
 ![trees](https://github.com/KohlerHECTOR/MBPO-Scikit-Stable/blob/main/mbpo_schematics_rdme/evals-gsteps.png?raw=true)
 
 
