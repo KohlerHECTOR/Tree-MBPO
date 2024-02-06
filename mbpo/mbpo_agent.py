@@ -10,6 +10,7 @@ from joblib import dump
 from mbpo.model_estimators import FullTransitionModel, DoneModel
 from mbpo.model_env import make_env
 import torch as th
+from stable_baselines3.common.evaluation import evaluate_policy
 
 
 class MBPOAgent:
@@ -87,11 +88,15 @@ class MBPOAgent:
                 cum_r += r
                 if term or trunc:
                     s, _ = self.env.reset()
-                    self.evals.append(cum_r)
-                    self.times.append(time.time() - start)
+                    # self.evals.append(cum_r)
+                    # self.times.append(time.time() - start)
                     cum_r = 0
                 s = snext
-            print("Perf Real Env {}".format(self.evals[-1]))
+            if i % 10 == 0:
+                mn, std_ = evaluate_policy(self.agent, self.env)
+                self.evals.append(mn)
+                self.times.append(time.time() - start)
+                print("Perf Real Env {}".format((mn, std_)))
 
             self.transi.fit(self.S, self.A, self.R, self.Snext) # Separate ?
             self.done.fit(self.S, self.A, self.R, self.Snext, self.Term)

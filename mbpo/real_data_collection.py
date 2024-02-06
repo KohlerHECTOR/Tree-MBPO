@@ -26,7 +26,7 @@ def init_rng_data(
     return S, A, R, SN, Term
 
 
-def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 1000):
+def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 1000, deterministic=False):
     """collect real env transitions as seperate np arrays from the
     real model using policy trained on estimated model.
 
@@ -51,7 +51,7 @@ def collect_real_data(agent: OffPolicyAlgorithm, env: gym.Env, nb_steps: int = 1
     while stp < nb_steps:
         with th.no_grad():
             mean_actions = agent.predict(
-                th.FloatTensor(s.reshape(1, -1)), deterministic=False
+                th.FloatTensor(s.reshape(1, -1)), deterministic=deterministic
             )[0]
         S[stp] = s
         action = mean_actions[0]
