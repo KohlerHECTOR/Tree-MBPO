@@ -7,7 +7,7 @@ import os
 args = sys.argv[1:]
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
-compare_folder = "Experience_Results/Comparison-"+timestr
+compare_folder = "Experience_Results/Comparison-" + timestr
 os.makedirs(compare_folder, exist_ok=True)
 
 

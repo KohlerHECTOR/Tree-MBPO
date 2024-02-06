@@ -6,3 +6,6 @@ ppo_tree_counts.py
 Swimmer-v3.zip
 agents/
 test_tree_leavs_cst.py
+logs/
+tree_counters.py
+trex.py

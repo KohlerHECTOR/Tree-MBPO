@@ -6,7 +6,9 @@ import sys
 
 args = sys.argv[1:]
 
-assert len(args) == 5, "python3 experience.py env_name estimator_cls pol_optim_cls nb_iter exp_name"
+assert (
+    len(args) == 5
+), "python3 experience.py env_name estimator_cls pol_optim_cls nb_iter exp_name"
 env_name = args[0]
 iters = int(args[3])
 exp_name = args[4]
@@ -21,7 +23,7 @@ elif args[1] == "mlp":
 
 elif args[1] == "cvtree":
     transi = FullTransitionTreeCVModel()
-    done = DoneTreeCVModel() # maybe also cv tree
+    done = DoneTreeCVModel()  # maybe also cv tree
 
 else:
     AssertionError, "Only Model estimators are Decision Tree, Best CV Tree, and MLP"

@@ -41,7 +41,7 @@ class GymModel(gym.Env):
 
 def make_env(
     observation_space,
-    action_space, 
+    action_space,
     real_states: np.ndarray,
     transi: FullTransitionModel,
     done: DoneModel,
