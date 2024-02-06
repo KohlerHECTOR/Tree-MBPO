@@ -1,3 +1,8 @@
 __pycache__/
 Experience_Results/
 todo.txt
+fake_training.py
+ppo_tree_counts.py
+Swimmer-v3.zip
+agents/
+test_tree_leavs_cst.py
