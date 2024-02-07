@@ -38,6 +38,8 @@ elif args[2] == "td3":
 else:
     AssertionError, "Only Pol Ooptim algos are SAC and TD3"
 
-mbpo = MBPOAgent(gym.make(env_name, max_episode_steps=1000), transi, done, agent_cls)
+
+env = gym.wrappers.NormalizeObservation(gym.make(env_name))
+mbpo = MBPOAgent(env, transi, done, agent_cls)
 mbpo.learn(iters)
 mbpo.save(exp_name)
