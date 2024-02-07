@@ -1,4 +1,4 @@
-###### For Tree-Based-Exploration see: https://github.com/KohlerHECTOR/TREX-Tree-Reward-EXploration/tree/main
+###### For Tree-Based-Exploration see: https://github.com/KohlerHECTOR/TREX-Tree-Reward-EXploration
 ## Only Continuous actions
 
 
